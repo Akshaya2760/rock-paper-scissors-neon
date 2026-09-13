@@ -1,0 +1,7 @@
+{
+  "name": "Rock • Paper • Scissors — Neon Arena",
+  "description": "A premium neon arcade Rock Paper Scissors game featuring AI pattern prediction, combos, power-ups, achievements, audio synthesis, and stats tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
