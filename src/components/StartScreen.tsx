@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Play, Trophy, BarChart3, Settings, HelpCircle, User, Calendar, Volume2, VolumeX, Music } from 'lucide-react';
+import { Play, Trophy, BarChart3, Settings, HelpCircle, User, Calendar, Volume2, VolumeX, Music, Database } from 'lucide-react';
 import { sound } from '../services/sound';
 import { GameSettings, PlayerProfile } from '../types';
 
@@ -14,6 +14,7 @@ interface StartScreenProps {
   onOpenHowToPlay: () => void;
   onOpenProfile: () => void;
   onOpenDaily: () => void;
+  onOpenMongoStatus: () => void;
   onToggleSound: () => void;
   onToggleMusic: () => void;
 }
@@ -28,6 +29,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   onOpenHowToPlay,
   onOpenProfile,
   onOpenDaily,
+  onOpenMongoStatus,
   onToggleSound,
   onToggleMusic,
 }) => {
@@ -63,6 +65,21 @@ export const StartScreen: React.FC<StartScreenProps> = ({
 
         {/* Action icons */}
         <div className="flex items-center gap-2">
+          {/* MongoDB Cloud Pill */}
+          <button
+            id="btn-open-mongo-header"
+            onClick={() => {
+              sound.playButtonClick();
+              onOpenMongoStatus();
+            }}
+            onMouseEnter={handleHover}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/80 border border-emerald-500/40 hover:border-emerald-400 hover:neon-glow-cyan transition-all text-emerald-300 text-xs font-bold font-orbitron backdrop-blur-md cursor-pointer"
+            title="MongoDB Cloud Database Status & Sync"
+          >
+            <Database className="w-4 h-4 text-emerald-400" />
+            <span className="hidden sm:inline">MongoDB Cloud</span>
+          </button>
+
           {/* Daily Challenge Pill */}
           <button
             id="btn-open-daily-header"
@@ -268,6 +285,22 @@ export const StartScreen: React.FC<StartScreenProps> = ({
               <span>SETTINGS</span>
             </motion.button>
           </div>
+
+          {/* MongoDB Cloud Banner Button */}
+          <motion.button
+            id="btn-main-mongo-cloud"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              sound.playButtonClick();
+              onOpenMongoStatus();
+            }}
+            onMouseEnter={handleHover}
+            className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-950/60 via-slate-900/80 to-cyan-950/60 border border-emerald-500/40 hover:border-emerald-400 hover:neon-glow-cyan text-emerald-300 font-bold font-orbitron text-xs flex items-center justify-center gap-2 backdrop-blur-sm cursor-pointer transition-all"
+          >
+            <Database className="w-4 h-4 text-emerald-400" />
+            <span>MONGODB CLOUD DATABASE & SYNC</span>
+          </motion.button>
         </div>
       </main>
 

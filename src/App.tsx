@@ -33,6 +33,8 @@ import { DailyChallengeModal } from './components/DailyChallengeModal';
 import { HowToPlayModal } from './components/HowToPlayModal';
 import { SettingsModal } from './components/SettingsModal';
 import { PauseModal } from './components/PauseModal';
+import { MongoStatusModal } from './components/MongoStatusModal';
+import { MongoApiService } from './services/mongoApi';
 
 export default function App() {
   // Persistence states
@@ -56,6 +58,7 @@ export default function App() {
   const [howToPlayModalOpen, setHowToPlayModalOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [pauseModalOpen, setPauseModalOpen] = useState(false);
+  const [mongoModalOpen, setMongoModalOpen] = useState(false);
 
   // Match configurations
   const [matchConfig, setMatchConfig] = useState({
@@ -110,6 +113,11 @@ export default function App() {
   useEffect(() => {
     sound.setSettings(settings.soundEnabled, settings.musicEnabled, settings.volume);
   }, [settings]);
+
+  // Initial sync with MongoDB backend
+  useEffect(() => {
+    MongoApiService.syncProfile(profile, stats).catch(() => {});
+  }, []);
 
   // Max rounds calculation based on mode
   const getMaxRounds = (mode: GameMode): number | null => {
@@ -559,7 +567,7 @@ export default function App() {
 
     // Save to Leaderboard
     const winRate = currentRound > 0 ? Math.round((playerWins / currentRound) * 100) : 0;
-    const newLeaderboard = StorageService.addLeaderboardEntry({
+    const leaderboardPayload = {
       playerName: matchConfig.playerName,
       avatar: matchConfig.avatar,
       score: playerScore,
@@ -568,11 +576,17 @@ export default function App() {
       bestStreak: bestMatchStreak,
       difficulty: matchConfig.difficulty,
       gameMode: matchConfig.gameMode,
-    });
+    };
+    const newLeaderboard = StorageService.addLeaderboardEntry(leaderboardPayload);
     setLeaderboard(newLeaderboard);
 
-    // Populate summary modal
-    setMatchSummary({
+    // Sync score & match with MongoDB Cloud
+    MongoApiService.submitLeaderboardEntry({
+      ...leaderboardPayload,
+      date: new Date().toLocaleDateString(),
+    }).catch(() => {});
+
+    const summaryObj: MatchSummary = {
       playerName: matchConfig.playerName,
       avatar: matchConfig.avatar,
       gameMode: matchConfig.gameMode,
@@ -587,7 +601,13 @@ export default function App() {
       isVictory,
       history: matchHistory,
       xpGained,
-    });
+    };
+
+    MongoApiService.recordMatch(summaryObj).catch(() => {});
+    MongoApiService.syncProfile(updatedProfile, updatedStats).catch(() => {});
+
+    // Populate summary modal
+    setMatchSummary(summaryObj);
   };
 
   // Claim Daily Mission Reward
@@ -672,6 +692,7 @@ export default function App() {
           onOpenHowToPlay={() => setHowToPlayModalOpen(true)}
           onOpenProfile={() => setProfileModalOpen(true)}
           onOpenDaily={() => setDailyModalOpen(true)}
+          onOpenMongoStatus={() => setMongoModalOpen(true)}
           onToggleSound={() => {
             const updated = { ...settings, soundEnabled: !settings.soundEnabled };
             setSettings(updated);
@@ -798,6 +819,10 @@ export default function App() {
         isOpen={settingsModalOpen}
         settings={settings}
         onClose={() => setSettingsModalOpen(false)}
+        onOpenMongoStatus={() => {
+          setSettingsModalOpen(false);
+          setMongoModalOpen(true);
+        }}
         onUpdateSettings={(newSettings) => {
           setSettings(newSettings);
           StorageService.saveSettings(newSettings);
@@ -823,6 +848,18 @@ export default function App() {
         onMainMenu={() => {
           setPauseModalOpen(false);
           setCurrentScreen('start');
+        }}
+      />
+
+      {/* MongoDB Cloud Database & Sync Modal */}
+      <MongoStatusModal
+        isOpen={mongoModalOpen}
+        onClose={() => setMongoModalOpen(false)}
+        profile={profile}
+        stats={stats}
+        leaderboard={leaderboard}
+        onSyncComplete={() => {
+          // Refresh local state if needed
         }}
       />
     </div>

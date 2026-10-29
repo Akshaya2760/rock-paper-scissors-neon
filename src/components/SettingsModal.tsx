@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Settings, Volume2, VolumeX, Music, Eye, Palette, AlertTriangle, Check, Trash2 } from 'lucide-react';
+import { X, Settings, Volume2, VolumeX, Music, Eye, Palette, AlertTriangle, Check, Trash2, Database } from 'lucide-react';
 import { Difficulty, GameSettings } from '../types';
 import { sound } from '../services/sound';
 
@@ -8,6 +8,7 @@ interface SettingsModalProps {
   isOpen: boolean;
   settings: GameSettings;
   onClose: () => void;
+  onOpenMongoStatus?: () => void;
   onUpdateSettings: (newSettings: GameSettings) => void;
   onResetStats: () => void;
   onResetAchievements: () => void;
@@ -19,6 +20,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   settings,
   onClose,
+  onOpenMongoStatus,
   onUpdateSettings,
   onResetStats,
   onResetAchievements,
@@ -232,6 +234,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   />
                 </button>
               </div>
+            </div>
+
+            {/* MongoDB Cloud Database Section */}
+            <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Database className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-xs font-bold font-orbitron text-emerald-300 uppercase tracking-wider">
+                    MONGODB CLOUD PERSISTENCE
+                  </h3>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 font-orbitron">
+                  ONLINE SYNC
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Matches, high scores, and player statistics synchronize to MongoDB Atlas.
+              </p>
+              {onOpenMongoStatus && (
+                <button
+                  id="btn-settings-open-mongo"
+                  onClick={() => {
+                    sound.playButtonClick();
+                    onOpenMongoStatus();
+                  }}
+                  className="w-full py-2.5 px-3 rounded-xl bg-slate-900 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 hover:text-white font-bold font-orbitron text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                >
+                  <Database className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>MANAGE MONGODB CLOUD & SYNC</span>
+                </button>
+              )}
             </div>
 
             {/* Storage & Reset Section */}
